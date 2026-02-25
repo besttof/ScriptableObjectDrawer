@@ -1,0 +1,11 @@
+{
+    "name": "ScriptableObjectDrawer.Editor",
+    "rootNamespace": "Besttof.ScriptableObjectDrawer.Editor",
+    "references": [
+      "ScriptableObjectDrawer"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

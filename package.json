@@ -1,0 +1,21 @@
+{
+  "name": "com.besttof.scriptableobjectdrawer",
+  "displayName": "ScriptableObject Drawer",
+  "version": "0.1.0",
+  "unity": "6000.0",
+  "description": "Description",
+  "dependencies": {
+    "com.unity.test-framework": "1.6.0"
+  },
+  "samples": [
+    {
+      "displayName": "Sample",
+      "description": "Sample Description",
+      "path": "Samples/Example"
+    }
+  ],
+  "author": {
+    "name": "besttof",
+    "url": "https://www.besttof.com"
+  }
+}
