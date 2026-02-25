@@ -147,11 +147,6 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 			using var poolHandle = HashSetPool<Type>.Get(out HashSet<Type> typeCandidates);
 			TypeUtils.GetTypeCandidates(fieldInfo, typeCandidates);
 
-			if (typeCandidates.Count > 8)
-			{
-				return;
-			}
-
 			// apply some heuristics to guess which object is the most likely to be needed
 			// (i.e. the most changed, latest updated one)
 			// var asset = typeCandidates.SelectMany(LoadAssetsByType)
