@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Unity.Properties;
 using UnityEditor;
 using UnityEngine;
@@ -204,109 +202,6 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 			return AssetDatabase.FindAssets($"t:{type}")
 			                    .Select(AssetDatabase.GUIDToAssetPath)
 			                    .Select(path => (path, asset: AssetDatabase.LoadAssetAtPath(path, type)));
-		}
-	}
-
-	internal static class AssetDatabaseUtils
-	{
-		// internal static IEnumerable<(string path, UnityEngine.Object asset)> LoadAssetsByType(Type type)
-		// {
-		// 	return AssetDatabase.FindAssets($"t:{type}")
-		// 	                    .Select(AssetDatabase.GUIDToAssetPath)
-		// 	                    .Select(path => (path, asset: AssetDatabase.LoadAssetAtPath(path, type)));
-		// }
-
-
-		internal static IEnumerable<AssetResult> LoadAllAssetsOfType(Type type)
-		{
-			var allPaths = AssetDatabase.GetAllAssetPaths();
-			foreach (var path in allPaths)
-			{
-				var assetType = AssetDatabase.GetMainAssetTypeAtPath(path);
-				if (assetType == type)
-				{
-					yield return new AssetResult
-					             {
-						             Path = path,
-						             Asset = AssetDatabase.LoadAssetAtPath(path, assetType)
-					             };
-				}
-			}
-		}
-
-		internal static IEnumerable<AssetResult> LoadAllAssetsOfType(HashSet<Type> types)
-		{
-			var allPaths = AssetDatabase.GetAllAssetPaths();
-			foreach (var path in allPaths)
-			{
-				var assetType = AssetDatabase.GetMainAssetTypeAtPath(path);
-				if (types.Contains(assetType))
-				{
-					yield return new AssetResult
-					             {
-						             Path = path,
-						             Asset = AssetDatabase.LoadAssetAtPath(path, assetType)
-					             };
-				}
-			}
-		}
-
-		internal struct AssetResult : IEquatable<AssetResult>
-		{
-			public string Path;
-			public UnityEngine.Object Asset;
-
-			public bool Equals(AssetResult other) => Path == other.Path && Asset == other.Asset;
-			public override bool Equals(object obj) => obj is AssetResult other && Equals(other);
-			public override int GetHashCode() => HashCode.Combine(Path, Asset);
-		}
-	}
-
-	internal static class TypeUtils
-	{
-		internal static string GetFriendlyTypeName(Type type)
-		{
-			// return TypeUtility.GetTypeDisplayName(type);
-			if (!type.IsGenericType) return type.Name;
-
-			var marker = type.Name.IndexOf('`');
-			var typeName = type.Name.AsSpan(0, (marker > 0 ? marker : type.Name.Length - 1));
-
-			var genericArguments = type.GetGenericArguments().Select(GetFriendlyTypeName);
-			return typeName.ToString() + "<" + string.Join(", ", genericArguments) + ">";
-		}
-
-		internal static HashSet<Type> GetTypeCandidates(FieldInfo fieldInfo)
-		{
-			var set = new HashSet<Type>();
-			GetTypeCandidates(fieldInfo, set);
-			return set;
-		}
-
-		internal static void GetTypeCandidates(FieldInfo fieldInfo, HashSet<Type> result) // hashset
-		{
-			result.Clear();
-
-			var fieldType = fieldInfo.FieldType;
-			var actualType = fieldType;
-
-			// Get the type of the element if it is a list (IEnumerables) or array, for lists
-			// we assume the first element to be the element type
-			if (fieldType.IsArray)
-			{
-				actualType = fieldType.GetElementType();
-			}
-			else if (typeof(IEnumerable).IsAssignableFrom(fieldType))
-			{
-				actualType = fieldType.GenericTypeArguments.FirstOrDefault();
-			}
-
-			if (actualType is null) return;
-
-
-			if (!actualType.IsGenericType) result.Add(actualType);
-
-			result.UnionWith(TypeCache.GetTypesDerivedFrom(actualType));
 		}
 	}
 }
