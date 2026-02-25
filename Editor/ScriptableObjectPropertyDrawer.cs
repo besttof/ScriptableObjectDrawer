@@ -169,17 +169,14 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 			using var poolHandle = HashSetPool<Type>.Get(out HashSet<Type> typeCandidates);
 			TypeUtils.GetTypeCandidates(fieldInfo, typeCandidates);
 
-			// apply some heuristics to guess which object is the most likely to be needed
-			// (i.e. the most changed, latest updated one)
-			// var asset = typeCandidates.SelectMany(LoadAssetsByType)
+			// Apply some heuristics to guess which object is the most likely to be needed
+			// (i.e. currently selected, the most changed, latest updated one)
+			// Take advantage of lazy evaluation of Linq so not all objects are iterated
+			// TODO maybe generate a score based on each property, or at least combine selection and dirty count.
 			var asset = AssetDatabaseUtils.LoadAllAssetsOfType(typeCandidates)
-			                              .OrderByDescending(x =>
-			                              {
-				                              var count = EditorUtility.GetDirtyCount(x.Asset);
-				                              Debug.Log($"{x.Path} {count}");
-				                              return count;
-			                              })
-			                              .ThenByDescending(x => File.GetLastAccessTime(x.Path))
+			                              .OrderByDescending(static x => Array.IndexOf(Selection.objects, x.Asset))
+			                              .ThenByDescending(static x => EditorUtility.GetDirtyCount(x.Asset))
+			                              .ThenByDescending(static x => File.GetLastAccessTime(x.Path))
 			                              .Select(x => x.Asset)
 			                              .FirstOrDefault();
 
