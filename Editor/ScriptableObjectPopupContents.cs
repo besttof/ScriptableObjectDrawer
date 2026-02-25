@@ -6,7 +6,6 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 	public class ScriptableObjectPopupContents : PopupWindowContent
 	{
 		private readonly UnityEditor.Editor _editor;
-		private readonly string _title;
 		private Vector2 _scrollPos;
 
 		private readonly GUIStyle _scrollAreaStyle;
@@ -42,8 +41,6 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 		{
 			_scriptableObject = scriptableObject;
 			_width = Mathf.Max(300f, width);
-			_title = $"{ObjectNames.NicifyVariableName(property.name)} : {ObjectNames.GetInspectorTitle(scriptableObject)}";
-
 			UnityEditor.Editor.CreateCachedEditor(scriptableObject, null, ref _editor);
 		}
 
