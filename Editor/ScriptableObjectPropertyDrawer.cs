@@ -180,7 +180,6 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 			if (string.IsNullOrWhiteSpace(assetPath)) return;
 
 			SessionState.SetString(_lastUsedFolderKey, Path.GetDirectoryName(assetPath));
-			Debug.Log(TypeUtility.CanBeInstantiated(type));
 			var newObject = ScriptableObject.CreateInstance(type);
 
 			AssetDatabase.CreateAsset(newObject, assetPath);
@@ -189,14 +188,6 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 			property.serializedObject.Update();
 			property.objectReferenceValue = newObject;
 			property.serializedObject.ApplyModifiedProperties();
-		}
-
-
-		private static IEnumerable<(string path, UnityEngine.Object asset)> LoadAssetsByType(Type type)
-		{
-			return AssetDatabase.FindAssets($"t:{type}")
-			                    .Select(AssetDatabase.GUIDToAssetPath)
-			                    .Select(path => (path, asset: AssetDatabase.LoadAssetAtPath(path, type)));
 		}
 	}
 }
