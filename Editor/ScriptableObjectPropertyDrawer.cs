@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Unity.Properties;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -15,6 +14,8 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 		private const string _lastUsedFolderKey = "besttof.createScriptableObjectFolder";
 		private const float _buttonWidth = 22f;
 		private const float _buttonPadding = 2f;
+
+		private static readonly Dictionary<Type, GUIContent> _contentsCache = new();
 
 		private static class Styles
 		{
@@ -71,14 +72,35 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 				                          width = _buttonWidth,
 			                          };
 
-			if (GUI.Button(popupButtonPosition, Contents.PopoutButton, Styles.FieldButton) &&
-			    property.objectReferenceValue is ScriptableObject scriptableObject)
-			{
-				var currentViewWidth = EditorGUIUtility.currentViewWidth;
 
+			var popupContent = GetButtonContentForProperty(property);
+			if (GUI.Button(popupButtonPosition, popupContent, Styles.FieldButton))
+			{
+				ShowPopup(position, property);
 			}
 
 			return totalWidth;
+		}
+
+		private static void ShowPopup(Rect position, SerializedProperty property)
+		{
+			if (property.objectReferenceValue is not ScriptableObject scriptableObject) return;
+			if (EditorWindow.focusedWindow is not PopupWindow) ScriptableObjectPopupContents.ResetStack();
+
+			var currentViewWidth = EditorGUIUtility.currentViewWidth;
+			ScriptableObjectPopupContents.ShowNestedPopup(position, scriptableObject, currentViewWidth);
+		}
+
+		private static GUIContent GetButtonContentForProperty(SerializedProperty property)
+		{
+			var scriptableObjectType = property.objectReferenceValue.GetType();
+			if (!_contentsCache.TryGetValue(scriptableObjectType, out var content))
+			{
+				content = new GUIContent(AssetPreview.GetMiniThumbnail(property.objectReferenceValue), "Show object in popup");
+				_contentsCache[scriptableObjectType] = content;
+			}
+
+			return content;
 		}
 
 		private float DrawCreateGUI(SerializedProperty property, Rect contentPosition)
