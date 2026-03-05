@@ -9,9 +9,9 @@
   },
   "samples": [
     {
-      "displayName": "Sample",
-      "description": "Sample Description",
-      "path": "Samples/Example"
+      "displayName": "Basic Example",
+      "description": "A basic example with some ScriptableObjects to play around with.",
+      "path": "Samples~/Sample"
     }
   ],
   "author": {
