@@ -17,7 +17,7 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 
 		private static class Contents
 		{
-			public static readonly GUIContent PopoutButton = EditorGUIUtility.IconContent("LockIcon", "More");
+			public static readonly GUIContent PopoutButton = EditorGUIUtility.IconContent("LockIcon-On", "More");
 		}
 
 		private static class Styles
