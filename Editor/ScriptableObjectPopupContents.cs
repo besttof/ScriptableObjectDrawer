@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
+using PopupWindow = UnityEditor.PopupWindow;
 
 namespace Besttof.ScriptableObjectDrawer.Editor
 {
@@ -22,11 +25,6 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 
 		private static class Styles
 		{
-			public static readonly GUIStyle ScrollArea = new()
-			                                             {
-				                                             margin = new RectOffset(2, 2, 2, 2),
-			                                             };
-
 			public static readonly GUIStyle Header = new(EditorStyles.boldLabel)
 			                                         {
 				                                         padding = new RectOffset(2, 2, 2, 2)
@@ -47,29 +45,6 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 			UnityEditor.Editor.CreateCachedEditor(scriptableObject, null, ref _editor);
 		}
 
-		public override Vector2 GetWindowSize()
-		{
-			var so = new SerializedObject(_scriptableObject);
-			var it = so.GetIterator();
-			it.NextVisible(true);
-
-			var height = EditorGUIUtility.singleLineHeight +
-			             EditorGUIUtility.standardVerticalSpacing * 2f +
-			             Styles.ScrollArea.margin.vertical +
-			             Styles.Header.padding.vertical +
-			             EditorStyles.inspectorDefaultMargins.padding.vertical +
-			             EditorStyles.inspectorDefaultMargins.margin.vertical;
-
-			do
-			{
-				var propertyHeight = EditorGUI.GetPropertyHeight(it, GUIContent.none, true);
-				// Debug.Log($"{it.propertyPath} {propertyHeight}");
-				height += propertyHeight + EditorGUIUtility.standardVerticalSpacing;
-			} while (it.NextVisible(false));
-
-			return new Vector2(_width, height);
-		}
-
 		public override void OnOpen()
 		{
 			_popupStack.Push(this);
@@ -81,13 +56,20 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 			base.OnClose();
 		}
 
-		// This complains that the window is 0,0 size. UIToolkit is _so_ ready to replace IMGui...
-		// public override UnityEngine.UIElements.VisualElement CreateGUI()
-		// {
-		// 	return _editor.CreateInspectorGUI();
-		// }
+		public override VisualElement CreateGUI()
+		{
+			var root = new VisualElement
+			           {
+				           style = { width = _width }
+			           };
+			
+			root.Add(new IMGUIContainer(TitleBarGUI));
+			var inspector = new InspectorElement(_scriptableObject);
+			root.Add(inspector);
+			return root;
+		}
 
-		public override void OnGUI(Rect rect)
+		public void TitleBarGUI()
 		{
 			using (var _ = new GUILayout.HorizontalScope(Styles.Header))
 			{
@@ -97,12 +79,6 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 				}
 
 				EditorGUILayout.InspectorTitlebar(true, _scriptableObject, false);
-			}
-
-			using (var scroll = new EditorGUILayout.ScrollViewScope(_scrollPos, Styles.ScrollArea))
-			{
-				_editor.OnInspectorGUI();
-				_scrollPos = scroll.scrollPosition;
 			}
 		}
 
