@@ -88,11 +88,20 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 			if (EditorWindow.focusedWindow is not PopupWindow) ScriptableObjectPopupContents.ResetStack();
 
 			var currentViewWidth = EditorGUIUtility.currentViewWidth;
-			ScriptableObjectPopupContents.ShowNestedPopup(position, scriptableObject, currentViewWidth);
+			if (ScriptableObjectPopupSettings.instance.SkipInPlacePopup)
+			{
+				EditorUtility.OpenPropertyEditor(scriptableObject);
+			}
+			else
+			{
+				ScriptableObjectPopupContents.ShowNestedPopup(position, scriptableObject, currentViewWidth);
+			}
 		}
 
 		private static GUIContent GetButtonContentForProperty(SerializedProperty property)
 		{
+			if (ScriptableObjectPopupSettings.instance.SkipInPlacePopup) return Contents.PopoutButton;
+
 			var scriptableObjectType = property.objectReferenceValue.GetType();
 			if (!_contentsCache.TryGetValue(scriptableObjectType, out var content))
 			{
@@ -203,6 +212,7 @@ namespace Besttof.ScriptableObjectDrawer.Editor
 
 			AssetDatabase.CreateAsset(newObject, assetPath);
 			AssetDatabase.SaveAssets();
+			// ProjectWindowUtil.ShowCreatedAsset(newObject);
 
 			property.serializedObject.Update();
 			property.objectReferenceValue = newObject;
